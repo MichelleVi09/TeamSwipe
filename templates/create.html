@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeamSwipe - Login</title>
+
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="create">
+    <div class="navbar">
+
+      <div class="nav-left">
+        <a class="brand" href="/">
+          <span class="brand-text">TeamSwipe</span>
+        </a>
+
+        <nav class="menu">
+          <ul>
+            <li><a class="nav-btn active" href="/browse">Browse</a></li>
+            <li><a class="nav-btn" href="/create">Create</a></li>
+            <li><a class="nav-btn" href="/contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="nav-right">
+        <a class="icon-btn" href="/notification" aria-label="Notification">
+          <i class="fa-regular fa-bell"></i>
+        </a>
+
+        <a class="icon-btn" href="/profile" aria-label="Profile">
+          <i class="fa-regular fa-user"></i>
+        </a>
+
+
+        <a class="login-btn"
+           href="/login">Log In</a>
+      </div>
+
+
+  </div>
+    <div class="heading">
+      <h3 class="writing">Coming soon!</h3>
+    </div>
+</body>
+</html>
