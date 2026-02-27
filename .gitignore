@@ -1,0 +1,14 @@
+# created by virtualenv automatically
+# Virtual env
+.venv/
+venv/
+
+# Secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# PyCharm
+.idea/
