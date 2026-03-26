@@ -3,50 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TeamSwipe - Login</title>
-
-
+  <title>TeamSwipe - Browse</title>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-<div class="browse">
-    <div class="navbar">
-
-      <div class="nav-left">
-        <a class="brand" href="/">
-          <span class="brand-text">TeamSwipe</span>
-        </a>
-
-        <nav class="menu">
-          <ul>
-            <li><a class="nav-btn active" href="/browse">Browse</a></li>
-            <li><a class="nav-btn" href="/create">Create</a></li>
-            <li><a class="nav-btn" href="/contact">Contact</a></li>
-          </ul>
-        </nav>
-
-      </div>
-        <div class="nav-right">
-        <a class="icon-btn" href="/notification" aria-label="Notification">
-          <i class="fa-regular fa-bell"></i>
-        </a>
-
-        <a class="icon-btn" href="/profile" aria-label="Profile">
-          <i class="fa-regular fa-user"></i>
-        </a>
-
-
-        <a class="login-btn"
-           href="/login">Log In</a>
-      </div>
-
-
-</div>
-    <div class="heading">
-      <h3 class="writing">Coming soon!</h3>
+<body class="theme-browse">
+  <div class="navbar">
+    <div class="nav-left">
+      <a class="brand" href="/"><span class="brand-text">TeamSwipe</span></a>
+      <nav class="menu">
+        <ul>
+          <li><a class="nav-btn active" href="/browse">Browse</a></li>
+          <li><a class="nav-btn" href="/create">Create</a></li>
+          <li><a class="nav-btn" href="/contact">Contact</a></li>
+        </ul>
+      </nav>
     </div>
+
+    <div class="nav-right">
+      <a class="icon-btn" href="/notification"><i class="fa-regular fa-bell"></i></a>
+      <a class="icon-btn" href="/profile"><i class="fa-regular fa-user"></i></a>
+      {% if is_logged_in %}
+        <form method="POST" action="/logout" class="nav-inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="login-btn" type="submit">Log Out</button>
+        </form>
+      {% else %}
+        <a class="login-btn" href="/login">Log In</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="browse-page">
+    <div class="heading">
+      <h1 class="writing">Active Squad Posts</h1>
+      <p>Search by game or tags. Keep the normal grid, or filter down and move into swipe mode when you want a faster matching flow.</p>
+    </div>
+
+    <section class="browse-controls">
+      <form method="GET" action="/browse" class="browse-filter-form">
+        <div class="browse-filter-field">
+          <label for="game">Game</label>
+          <input id="game" name="game" type="text" value="{{ game_filter }}" placeholder="e.g. Valorant">
+        </div>
+        <div class="browse-filter-field">
+          <label for="tag">Tag</label>
+          <input id="tag" name="tag" type="text" value="{{ tag_filter }}" placeholder="e.g. ranked">
+        </div>
+        <input type="hidden" name="mode" value="{{ mode }}">
+        <button class="post-btn" type="submit">Apply Filters</button>
+        {% if has_filters %}
+          <a class="hero-secondary" href="/browse">Clear</a>
+        {% endif %}
+      </form>
+
+      {% if has_filters %}
+        <div class="browse-mode-switch">
+          <a class="nav-btn {{ 'active' if mode == 'swipe' else '' }}" href="/browse?game={{ game_filter|urlencode }}&tag={{ tag_filter|urlencode }}&mode=swipe">Swipe Mode</a>
+          <a class="nav-btn {{ 'active' if mode == 'grid' else '' }}" href="/browse?game={{ game_filter|urlencode }}&tag={{ tag_filter|urlencode }}&mode=grid">Grid Mode</a>
+        </div>
+      {% endif %}
+    </section>
+
+    {% if has_filters and mode == 'swipe' %}
+      <section class="swipe-shell" data-logged-in="{{ 'true' if is_logged_in else 'false' }}">
+        {% if swipe_state == 'login_required' %}
+          <div class="empty-state">
+            <h2>Log in to use swipe mode</h2>
+            <p>Filtering works for everyone, but sending squad invites requires an account.</p>
+          </div>
+        {% elif swipe_state == 'available' %}
+          <div class="swipe-deck" id="swipeDeck">
+            {% for post in swipe_posts %}
+              <article class="swipe-card browse-post" data-post-id="{{ post._id }}">
+                <div class="swipe-badge">{{ post.game_name }}</div>
+                <h2>{{ post.post_name }}</h2>
+                <div class="browse-image-box">
+                  <img src="{{ post.image_url }}" alt="{{ post.game_name }}">
+                </div>
+                <p class="browse-description">{{ post.description }}</p>
+                <p class="browse-platform">{{ post.platform_name }}</p>
+                <div class="browse-tags">
+                  {% for tag in post.tags %}
+                    <span>{{ tag }}</span>
+                  {% endfor %}
+                </div>
+                <p class="swipe-owner">Posted by {{ post.user_email }}</p>
+                <div class="card-actions">
+                  <button type="button" class="card-action-btn card-action-pass" data-action="left" data-post-id="{{ post._id }}">Pass</button>
+                  <button type="button" class="card-action-btn card-action-contact" data-action="right" data-post-id="{{ post._id }}">Request Invite</button>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+
+          <article class="swipe-end-card browse-post" id="swipeEndCard" hidden>
+            <div class="swipe-badge">Stack Complete</div>
+            <h2>End Of Swiping</h2>
+            <p class="browse-description">You made it through every available filtered post. Reload this stack with your swiped posts removed, or reset everything and go back to the full browse board.</p>
+            <div class="swipe-actions swipe-actions-end">
+              <a class="swipe-btn swipe-btn-right" href="/browse?game={{ game_filter|urlencode }}&tag={{ tag_filter|urlencode }}&mode=swipe">Refresh Filtered Stack</a>
+              <a class="swipe-btn swipe-btn-left" href="/browse">Browse All Posts</a>
+            </div>
+          </article>
+
+          <div class="swipe-actions">
+            <button type="button" class="swipe-btn swipe-btn-left" id="swipeLeftBtn">Swipe Left</button>
+            <button type="button" class="swipe-btn swipe-btn-right" id="swipeRightBtn">Swipe Right</button>
+          </div>
+          <p class="swipe-helper">Swipe left to skip. Swipe right to request an invite from the post owner.</p>
+        {% elif swipe_state == 'exhausted' %}
+          <article class="swipe-end-card browse-post">
+            <div class="swipe-badge">Stack Complete</div>
+            <h2>End Of Swiping</h2>
+            <p class="browse-description">There are filtered posts for this search, but there are no swipe candidates left for you right now. That usually means you already acted on them or they are your own posts.</p>
+            <div class="swipe-actions swipe-actions-end">
+              <a class="swipe-btn swipe-btn-right" href="/browse?game={{ game_filter|urlencode }}&tag={{ tag_filter|urlencode }}&mode=swipe">Refresh Filtered Stack</a>
+              <a class="swipe-btn swipe-btn-left" href="/browse">Browse All Posts</a>
+            </div>
+          </article>
+        {% else %}
+          <div class="empty-state">
+            <h2>No swipe candidates found</h2>
+            <p>Try a broader game or tag search, or switch back to grid mode to review every filtered post.</p>
+          </div>
+        {% endif %}
+      </section>
+    {% else %}
+      <div class="posts-grid">
+        {% if posts %}
+          {% for post in posts %}
+            <div class="browse-post">
+              <div class="swipe-badge">{{ post.game_name }}</div>
+              <h2>{{ post.post_name }}</h2>
+              <div class="browse-image-box">
+                <img src="{{ post.image_url }}" alt="{{ post.game_name }}">
+              </div>
+              <p class="browse-description">{{ post.description }}</p>
+              <p class="browse-platform">{{ post.platform_name }}</p>
+            <div class="browse-tags">
+              {% for tag in post.tags %}
+                <span>{{ tag }}</span>
+              {% endfor %}
+            </div>
+            {% if is_logged_in and not post.is_own_post %}
+              <div class="card-actions">
+                <button type="button" class="card-action-btn card-action-pass" data-action="left" data-post-id="{{ post._id }}">Pass</button>
+                <button type="button" class="card-action-btn card-action-contact" data-action="right" data-post-id="{{ post._id }}">Request Invite</button>
+              </div>
+            {% elif not is_logged_in %}
+              <div class="card-actions">
+                <a class="card-action-btn card-action-contact" href="/login">Log In To Contact</a>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+          <div class="empty-state">
+            <h2>No active posts found</h2>
+            <p>There are no listings matching those filters yet. Try another game or tag.</p>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    const csrfToken = "{{ csrf_token }}";
+    const deck = document.getElementById("swipeDeck");
+    const leftBtn = document.getElementById("swipeLeftBtn");
+    const rightBtn = document.getElementById("swipeRightBtn");
+    const endCard = document.getElementById("swipeEndCard");
+    const gridActions = document.querySelectorAll(".card-action-btn[data-action]");
+
+    function syncSwipeState() {
+      if (!deck) return;
+      const remainingCards = deck.querySelectorAll(".swipe-card");
+      const hasCards = remainingCards.length > 0;
+
+      if (leftBtn) leftBtn.disabled = !hasCards;
+      if (rightBtn) rightBtn.disabled = !hasCards;
+      if (endCard) endCard.hidden = hasCards;
+    }
+
+    async function sendBrowseAction(postId, action) {
+      const response = await fetch("/browse/swipe-action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify({ post_id: postId, action })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.error || "Could not process swipe.");
+        return false;
+      }
+
+      return true;
+    }
+
+    async function handleSwipe(action) {
+      if (!deck) return;
+      const activeCard = deck.querySelector(".swipe-card");
+      if (!activeCard) return;
+
+      const postId = activeCard.dataset.postId;
+      const ok = await sendBrowseAction(postId, action);
+      if (!ok) return;
+
+      activeCard.classList.add(action === "right" ? "swipe-out-right" : "swipe-out-left");
+      setTimeout(() => {
+        activeCard.remove();
+        syncSwipeState();
+      }, 220);
+    }
+
+    if (leftBtn) {
+      leftBtn.addEventListener("click", () => handleSwipe("left"));
+    }
+
+    if (rightBtn) {
+      rightBtn.addEventListener("click", () => handleSwipe("right"));
+    }
+
+    gridActions.forEach((button) => {
+      button.addEventListener("click", async function () {
+        const postId = this.dataset.postId;
+        const action = this.dataset.action;
+        const ok = await sendBrowseAction(postId, action);
+        if (!ok) return;
+
+        const card = this.closest(".browse-post");
+        if (card) {
+          const message = document.createElement("p");
+          message.className = "card-action-feedback";
+          message.textContent = action === "right"
+            ? "Invite request sent. Check notifications for updates."
+            : "Post skipped for your swipe queue.";
+          const actions = card.querySelector(".card-actions");
+          if (actions) {
+            actions.replaceWith(message);
+          }
+        }
+      });
+    });
+
+    syncSwipeState();
+  </script>
 </body>
 </html>

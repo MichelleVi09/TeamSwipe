@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TeamSwipe - Login</title>
-
-
+  <title>TeamSwipe - Create</title>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <div class="create">
-    <div class="navbar">
+
+<body class="theme-create">
+<div class="navbar">
 
       <div class="nav-left">
         <a class="brand" href="/">
@@ -22,8 +20,8 @@
 
         <nav class="menu">
           <ul>
-            <li><a class="nav-btn active" href="/browse">Browse</a></li>
-            <li><a class="nav-btn" href="/create">Create</a></li>
+            <li><a class="nav-btn" href="/browse">Browse</a></li>
+            <li><a class="nav-btn active" href="/create">Create</a></li>
             <li><a class="nav-btn" href="/contact">Contact</a></li>
           </ul>
         </nav>
@@ -41,11 +39,125 @@
         <a class="login-btn"
            href="/login">Log In</a>
       </div>
-
-
   </div>
+  <div class="create-page">
     <div class="heading">
-      <h3 class="writing">Coming soon!</h3>
+      <h1 class="writing">CREATE A POST</h1>
+      <p>Dial in your game, platform, and tags, then preview the final card before you publish it.</p>
     </div>
+
+    <div class="create-card">
+      <div class="create-left">
+        <form method="POST" action="/create-post" class="create-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="game_name">Game Name</label>
+          <input class="create-input" type="text" id="game_name" name="game_name" placeholder="Enter game name" required>
+
+          <label for="post_name">Post Name</label>
+          <input class="create-input" type="text" id="post_name" name="post_name" placeholder="Enter post title" maxlength="52" required>
+
+          <label for="platform_name">Platform Name</label>
+          <input class="create-input" type="text" id="platform_name" name="platform_name" placeholder="Enter platform to play on" required>
+
+          <label for="description">Description</label>
+          <textarea class="create-textarea" id="description" name="description" placeholder="Describe what you're looking for..."></textarea>
+
+          <label for="tag1">Tag 1</label>
+          <input class="create-input" type="text" id="tag1" name="tag_1" placeholder="e.g. casual">
+
+          <label for="tag2">Tag 2</label>
+          <input class="create-input" type="text" id="tag2" name="tag_2" placeholder="e.g. 18+">
+
+          <label for="tag3">Tag 3</label>
+          <input class="create-input" type="text" id="tag3" name="tag_3" placeholder="e.g. mic required">
+
+          <button class="post-btn" type="submit">Post</button>
+        </form>
+      </div>
+
+      <div class="create-right">
+        <div class="post-preview">
+          <h2 id="preview-post-name">POST NAME HERE</h2>
+
+          <div class="preview-image-box">
+            <img id="preview-image"
+                 src="{{ url_for('static', filename='default-game.jpg') }}"
+                 alt="Game preview">
+          </div>
+          <p class="preview-description" id="preview-description">DESCRIPTION HERE</p>
+          <p class="preview-platform-name" id="preview-platform-name">PLATFORM NAME HERE</p>
+          <div class="preview-tags">
+            <span id="preview-tag1">tag 1</span>
+            <span id="preview-tag2">tag 2</span>
+            <span id="preview-tag3">tag 3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const gameNameInput = document.getElementById("game_name");
+    const postNameInput = document.getElementById("post_name");
+    const descriptionInput = document.getElementById("description");
+    const platformNameInput = document.getElementById("platform_name");
+    const tag1Input = document.getElementById("tag1");
+    const tag2Input = document.getElementById("tag2");
+    const tag3Input = document.getElementById("tag3");
+
+    const previewPostName = document.getElementById("preview-post-name");
+    const previewDescription = document.getElementById("preview-description");
+    const previewPlatformName = document.getElementById("preview-platform-name");
+    const previewTag1 = document.getElementById("preview-tag1");
+    const previewTag2 = document.getElementById("preview-tag2");
+    const previewTag3 = document.getElementById("preview-tag3");
+    const previewImage = document.getElementById("preview-image");
+
+
+    function updatePreview() {
+      previewPostName.textContent = postNameInput.value || "POST NAME HERE";
+      previewDescription.textContent = descriptionInput.value || "DESCRIPTION HERE";
+      previewPlatformName.textContent = platformNameInput.value || "PLATFORM NAME HERE";
+      previewTag1.textContent = tag1Input.value || "tag 1";
+      previewTag2.textContent = tag2Input.value || "tag 2";
+      previewTag3.textContent = tag3Input.value || "tag 3";
+    }
+    let imageLookupTimer = null;
+
+    async function updateGameImage() {
+      const gameName = gameNameInput.value.trim();
+
+      if (!gameName) {
+        previewImage.src = "/static/default-game.jpg";
+        return;
+      }
+
+      try {
+        const response = await fetch(`/game-cover?name=${encodeURIComponent(gameName)}`);
+        const data = await response.json();
+        previewImage.src = data.image_url || "/static/default-game.jpg";
+      } catch (error) {
+        previewImage.src = "/static/default-game.jpg";
+      }
+    }
+
+
+    function handleGameInput(){
+      updatePreview();
+
+      clearTimeout(imageLookupTimer);
+      imageLookupTimer = setTimeout(updateGameImage, 500);
+    }
+
+    gameNameInput.addEventListener("input", handleGameInput);
+    postNameInput.addEventListener("input", updatePreview);
+    descriptionInput.addEventListener("input", updatePreview);
+    platformNameInput.addEventListener("input", updatePreview);
+    tag1Input.addEventListener("input", updatePreview);
+    tag2Input.addEventListener("input", updatePreview);
+    tag3Input.addEventListener("input", updatePreview);
+
+    updatePreview();
+  </script>
 </body>
 </html>
+

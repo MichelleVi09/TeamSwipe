@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="theme-auth">
   <div class="main">
 
     <div class="navbar">
@@ -46,9 +46,14 @@
 
       <div class="auth-left">
         <h1 class="auth-title">Log In</h1>
-        <p class="auth-sub">Use your email and password to continue.</p>
+        <p class="auth-sub">Rejoin the queue, manage your squad posts, and keep your profile ready for the next match.</p>
+
+        {% if error_message %}
+          <div class="auth-error">{{ error_message }}</div>
+        {% endif %}
 
         <form method="POST" action="/login" class="auth-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input class="auth-input" type="email" name="email" placeholder="Email" required>
           <input class="auth-input" type="password" name="password" placeholder="Password" required>
           <button class="auth-primary" type="submit">Sign In</button>
@@ -57,7 +62,7 @@
 
       <div class="auth-right">
         <h2 class="auth-right-title">New Here?</h2>
-        <p class="auth-right-sub">Create an account to start matching with teammates.</p>
+        <p class="auth-right-sub">Create an account to start building your roster and posting your squad requirements.</p>
         <a class="auth-secondary" href="/register">Create Account</a>
       </div>
 
@@ -71,3 +76,4 @@
   </div>
 </body>
 </html>
+

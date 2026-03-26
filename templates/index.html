@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeamSwipe</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="theme-home">
+  <div class="main">
+
+    <div class="navbar">
+      <div class="nav-left">
+        <a class="brand" href="/">
+          <span class="brand-text">TeamSwipe</span>
+        </a>
+
+        <nav class="menu">
+          <ul>
+            <li><a class="nav-btn active" href="/browse">Browse</a></li>
+            <li><a class="nav-btn" href="/create">Create</a></li>
+            <li><a class="nav-btn" href="/contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="nav-right">
+        <a class="icon-btn" href="/notification" aria-label="Notification">
+          <i class="fa-regular fa-bell"></i>
+        </a>
+
+        <a class="icon-btn" href="/profile" aria-label="Profile">
+          <i class="fa-regular fa-user"></i>
+        </a>
+
+        <a class="login-btn" href="/login">Log In</a>
+      </div>
+    </div>
+
+    <section class="hero-banner">
+      <video class="hero-video" autoplay muted loop playsinline>
+        <source src="{{ url_for('static', filename='105446-670502919_medium.mp4') }}" type="video/mp4">
+      </video>
+
+      <div class="hero-overlay"></div>
+
+      <div class="hero-content">
+        <span class="eyebrow">Group Matchmaking</span>
+        <h1>TeamSwipe</h1>
+        <h2>Find your next squad before the queue starts.</h2>
+        <p>Build your roster, post what you need, and connect with players who match your game, platform, and pace.</p>
+        <div class="hero-actions">
+          <a class="hero-primary" href="/browse">Browse Squads</a>
+          <a class="hero-secondary" href="/create">Create a Post</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-stats">
+      <div class="stat-card">
+        <strong>Fast Match Discovery</strong>
+        <span>Search active squad posts without digging through generic forums or random chat threads.</span>
+      </div>
+      <div class="stat-card">
+        <strong>Game-First Profiles</strong>
+        <span>Lead with the title, platform, and tags that matter when finding the right teammates.</span>
+      </div>
+      <div class="stat-card">
+        <strong>Built For Team Play</strong>
+        <span>Designed around coordination, role fit, and finding players ready to queue now.</span>
+      </div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-heading">
+        <div>
+          <h2>Supported Titles</h2>
+          <p>Track popular competitive games and surface the artwork that makes each listing instantly recognizable.</p>
+        </div>
+      </div>
+
+      <div class="games-slider-wrapper">
+        <button type="button" class="slider-btn left" onclick="scrollGames(-1)">&#10094;</button>
+
+        <div class="games-slider" id="gamesSlider">
+          {% for game in games %}
+            <div class="game-card">
+              <img src="{{ game.image_url }}" alt="{{ game.name }}">
+            </div>
+          {% endfor %}
+        </div>
+
+        <button type="button" class="slider-btn right" onclick="scrollGames(1)">&#10095;</button>
+      </div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-heading">
+        <div>
+          <h2>How It Works</h2>
+          <p>Move from account creation to active squad search with a cleaner, more guided flow.</p>
+        </div>
+      </div>
+      <div class="how-steps">
+        <article class="how-step">
+          <div class="how-shot">
+            <span class="how-shot-label">Step 1</span>
+            <div class="how-shot-screen" aria-hidden="true">
+              <img class="how-shot-image" src="{{ url_for('static', filename='game_images/Screenshot 2026-03-25 200641.png') }}" alt="Login page preview">
+            </div>
+          </div>
+          <div class="how-copy">
+            <h3>Lock In Your Account</h3>
+            <p>Create an account or sign back in so you can manage your profile and keep your squad posts active.</p>
+            <a class="hero-secondary" href="/login">Go To Login</a>
+          </div>
+        </article>
+
+        <article class="how-step">
+          <div class="how-shot">
+            <span class="how-shot-label">Step 2</span>
+            <div class="how-shot-screen" aria-hidden="true">
+              <img class="how-shot-image" src="{{ url_for('static', filename='game_images/Screenshot 2026-03-25 200733.png') }}" alt="Create post page preview">
+            </div>
+          </div>
+          <div class="how-copy">
+            <h3>Build Your Post</h3>
+            <p>Choose the game, add your platform, describe your playstyle, and tag the kind of teammates you want.</p>
+            <a class="hero-secondary" href="/create">Go To Create</a>
+          </div>
+        </article>
+
+        <article class="how-step">
+          <div class="how-shot">
+            <span class="how-shot-label">Step 3</span>
+            <div class="how-shot-screen" aria-hidden="true">
+              <img class="how-shot-image" src="{{ url_for('static', filename='game_images/Screenshot 2026-03-25 200747.png') }}" alt="Browse posts page preview">
+            </div>
+          </div>
+          <div class="how-copy">
+            <h3>Scout Active Squads</h3>
+            <p>Browse open posts, compare platforms and tags, and find the team that fits your pace and goals.</p>
+            <a class="hero-secondary" href="/browse">Go To Browse</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function scrollGames(direction) {
+      const slider = document.getElementById("gamesSlider");
+      const scrollAmount = 500;
+      slider.scrollLeft += direction * scrollAmount;
+    }
+  </script>
+</body>
+</html>

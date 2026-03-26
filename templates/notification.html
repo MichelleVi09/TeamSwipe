@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TeamSwipe - Login</title>
-
-
+  <title>TeamSwipe - Notifications</title>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="theme-notification">
   <div class="notification">
     <div class="navbar">
-
       <div class="nav-left">
         <a class="brand" href="/">
           <span class="brand-text">TeamSwipe</span>
@@ -22,7 +19,7 @@
 
         <nav class="menu">
           <ul>
-            <li><a class="nav-btn active" href="/browse">Browse</a></li>
+            <li><a class="nav-btn" href="/browse">Browse</a></li>
             <li><a class="nav-btn" href="/create">Create</a></li>
             <li><a class="nav-btn" href="/contact">Contact</a></li>
           </ul>
@@ -37,14 +34,79 @@
           <i class="fa-regular fa-user"></i>
         </a>
 
+        <form method="POST" action="/logout" class="nav-inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="login-btn" type="submit">Log Out</button>
+        </form>
+      </div>
+    </div>
 
-        <a class="login-btn"
-           href="/login">Log In</a>
+    <div class="heading">
+      <h3 class="writing">Notifications</h3>
+      <p>Handle incoming squad requests and track the invites you already sent from swipe mode.</p>
+    </div>
+
+    <section class="notification-columns">
+      <div class="notification-column">
+        <div class="notification-panel notification-panel-list">
+          <div class="status-chip">Incoming Requests</div>
+          {% if incoming_requests %}
+            {% for invite in incoming_requests %}
+              <article class="notification-item">
+                <h2>{{ invite.requester_email }}</h2>
+                <p>Requested to join your post <strong>{{ invite.post_name }}</strong> for {{ invite.game_name }}.</p>
+                {% if invite.requester_discord_username %}
+                  <p>Discord username: <strong>{{ invite.requester_discord_username }}</strong></p>
+                {% endif %}
+                <div class="notification-actions">
+                  <form method="POST" action="/invite/{{ invite._id }}/approve">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="post-btn" type="submit">Approve</button>
+                  </form>
+                  <form method="POST" action="/invite/{{ invite._id }}/deny">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="hero-secondary" type="submit">Deny</button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <h2>No pending requests</h2>
+              <p>When someone swipes right on one of your filtered posts, the request will appear here.</p>
+            </div>
+          {% endif %}
+        </div>
       </div>
 
+      <div class="notification-column">
+        <div class="notification-panel notification-panel-list">
+          <div class="status-chip">Sent Invites</div>
+          {% if sent_requests %}
+            {% for invite in sent_requests %}
+              <article class="notification-item">
+                <h2>{{ invite.post_name }}</h2>
+                <p>Status: <strong>{{ invite.status|capitalize }}</strong></p>
+                {% if invite.status == "approved" and invite.owner_discord_username %}
+                  <p>Approved. The creator's Discord username is <strong>{{ invite.owner_discord_username }}</strong>.</p>
+                {% elif invite.status == "approved" %}
+                  <p>Approved, but the creator has not saved a Discord username yet.</p>
+                {% elif invite.status == "denied" %}
+                  <p>The post owner declined this request.</p>
+                {% else %}
+                  <p>This request is still waiting on the post owner.</p>
+                {% endif %}
+              </article>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <h2>No sent invites</h2>
+              <p>Use filtered swipe mode in browse to start sending requests.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
   </div>
-    <div class="heading">
-      <h3 class="writing">Coming soon!</h3>
-    </div>
 </body>
 </html>
